@@ -14,16 +14,237 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      game_history: {
+        Row: {
+          bet_amount: number
+          client_seed: string | null
+          created_at: string
+          game: Database["public"]["Enums"]["game_type"]
+          id: string
+          metadata: Json | null
+          multiplier: number
+          nonce: number | null
+          payout: number
+          server_seed_hash: string | null
+          user_id: string
+          won: boolean
+        }
+        Insert: {
+          bet_amount: number
+          client_seed?: string | null
+          created_at?: string
+          game: Database["public"]["Enums"]["game_type"]
+          id?: string
+          metadata?: Json | null
+          multiplier?: number
+          nonce?: number | null
+          payout?: number
+          server_seed_hash?: string | null
+          user_id: string
+          won?: boolean
+        }
+        Update: {
+          bet_amount?: number
+          client_seed?: string | null
+          created_at?: string
+          game?: Database["public"]["Enums"]["game_type"]
+          id?: string
+          metadata?: Json | null
+          multiplier?: number
+          nonce?: number | null
+          payout?: number
+          server_seed_hash?: string | null
+          user_id?: string
+          won?: boolean
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          country: string | null
+          created_at: string
+          date_of_birth: string | null
+          email: string
+          first_name: string
+          gender: string | null
+          id: string
+          language: Database["public"]["Enums"]["lang_preference"]
+          last_name: string
+          national_id: string | null
+          phone: string | null
+          theme: Database["public"]["Enums"]["theme_preference"]
+          trx_deposit_address: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          email: string
+          first_name?: string
+          gender?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["lang_preference"]
+          last_name?: string
+          national_id?: string | null
+          phone?: string | null
+          theme?: Database["public"]["Enums"]["theme_preference"]
+          trx_deposit_address: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string
+          first_name?: string
+          gender?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["lang_preference"]
+          last_name?: string
+          national_id?: string | null
+          phone?: string | null
+          theme?: Database["public"]["Enums"]["theme_preference"]
+          trx_deposit_address?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      support_chats: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          destination_address: string | null
+          id: string
+          notes: string | null
+          status: Database["public"]["Enums"]["transaction_status"]
+          tx_hash: string | null
+          type: Database["public"]["Enums"]["transaction_type"]
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          destination_address?: string | null
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["transaction_status"]
+          tx_hash?: string | null
+          type: Database["public"]["Enums"]["transaction_type"]
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          destination_address?: string | null
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["transaction_status"]
+          tx_hash?: string | null
+          type?: Database["public"]["Enums"]["transaction_type"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallets: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      game_type:
+        | "cakplain"
+        | "minescak"
+        | "blackcak"
+        | "plincocak"
+        | "limbocak"
+        | "rokketcak"
+        | "ballooncak"
+      lang_preference: "tr" | "en"
+      theme_preference: "lacivert" | "siyah" | "mavi" | "su_yesili"
+      transaction_status: "pending" | "completed" | "failed" | "cancelled"
+      transaction_type: "deposit" | "withdrawal" | "bet" | "win"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +371,21 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      game_type: [
+        "cakplain",
+        "minescak",
+        "blackcak",
+        "plincocak",
+        "limbocak",
+        "rokketcak",
+        "ballooncak",
+      ],
+      lang_preference: ["tr", "en"],
+      theme_preference: ["lacivert", "siyah", "mavi", "su_yesili"],
+      transaction_status: ["pending", "completed", "failed", "cancelled"],
+      transaction_type: ["deposit", "withdrawal", "bet", "win"],
+    },
   },
 } as const
