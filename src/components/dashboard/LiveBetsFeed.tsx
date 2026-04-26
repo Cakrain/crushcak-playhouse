@@ -22,45 +22,45 @@ export function LiveBetsFeed() {
 
   useEffect(() => {
     let mounted = true;
-    supabase
-      .from("game_history")
-      .select("id, game, bet_amount, multiplier, payout, won, created_at")
-      .order("created_at", { ascending: false })
-      .limit(30)
-      .then(({ data }) => {
+    // Anonymized feed via SECURITY DEFINER RPC — no user_id, seeds, or metadata exposed.
+    supabase.rpc("get_live_bets_feed").then(({ data }) => {
+      if (mounted && data) {
+        setRows(
+          (data as FeedRow[]).map((r) => ({
+            id: r.id,
+            game: r.game,
+            bet_amount: Number(r.bet_amount),
+            multiplier: Number(r.multiplier),
+            payout: Number(r.payout),
+            won: r.won,
+            created_at: r.created_at,
+          })),
+        );
+      }
+    });
+
+    // Poll every 5s instead of realtime to avoid leaking user_id via realtime payloads.
+    const interval = setInterval(() => {
+      supabase.rpc("get_live_bets_feed").then(({ data }) => {
         if (mounted && data) {
           setRows(
-            data.map((r) => ({
-              ...r,
+            (data as FeedRow[]).map((r) => ({
+              id: r.id,
+              game: r.game,
               bet_amount: Number(r.bet_amount),
               multiplier: Number(r.multiplier),
               payout: Number(r.payout),
+              won: r.won,
+              created_at: r.created_at,
             })),
           );
         }
       });
-
-    const channel = supabase
-      .channel("live-bets")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "game_history" }, (payload) => {
-        const r = payload.new as FeedRow;
-        setRows((prev) =>
-          [
-            {
-              ...r,
-              bet_amount: Number(r.bet_amount),
-              multiplier: Number(r.multiplier),
-              payout: Number(r.payout),
-            },
-            ...prev,
-          ].slice(0, 30),
-        );
-      })
-      .subscribe();
+    }, 5000);
 
     return () => {
       mounted = false;
-      supabase.removeChannel(channel);
+      clearInterval(interval);
     };
   }, []);
 
