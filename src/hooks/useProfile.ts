@@ -62,9 +62,9 @@ export function useWallet() {
     refresh();
 
     if (!user) return;
-    // Realtime updates
-    const channel = supabase
-      .channel(`wallet-${user.id}`)
+    // Unique channel name per mount avoids "callbacks after subscribe()" in StrictMode double-invoke.
+    const channel = supabase.channel(`wallet-${user.id}-${Math.random().toString(36).slice(2)}`);
+    channel
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "wallets", filter: `user_id=eq.${user.id}` },
