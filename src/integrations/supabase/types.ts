@@ -220,9 +220,50 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      live_bets_feed: {
+        Row: {
+          bet_amount: number | null
+          created_at: string | null
+          game: Database["public"]["Enums"]["game_type"] | null
+          id: string | null
+          multiplier: number | null
+          payout: number | null
+          won: boolean | null
+        }
+        Insert: {
+          bet_amount?: number | null
+          created_at?: string | null
+          game?: Database["public"]["Enums"]["game_type"] | null
+          id?: string | null
+          multiplier?: number | null
+          payout?: number | null
+          won?: boolean | null
+        }
+        Update: {
+          bet_amount?: number | null
+          created_at?: string | null
+          game?: Database["public"]["Enums"]["game_type"] | null
+          id?: string | null
+          multiplier?: number | null
+          payout?: number | null
+          won?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      get_live_bets_feed: {
+        Args: never
+        Returns: {
+          bet_amount: number
+          created_at: string
+          game: Database["public"]["Enums"]["game_type"]
+          id: string
+          multiplier: number
+          payout: number
+          won: boolean
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
