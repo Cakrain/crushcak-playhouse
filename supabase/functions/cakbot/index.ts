@@ -57,10 +57,9 @@ Deno.serve(async (req: Request) => {
     if (!message) return json({ error: "empty_message" }, 400);
 
     // Rate limit: count assistant messages in last hour for this user
-    const admin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
     const sinceIso = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const { count } = await admin
       .from("support_chats")
