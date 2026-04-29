@@ -23,11 +23,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(sess?.user ?? null);
     });
 
-    supabase.auth.getSession().then(({ data: { session: sess } }) => {
+    (async () => {
+      const { data: { session: sess } } = await supabase.auth.getSession();
+      if (sess) {
+        // Verify the JWT's user still exists; if not (e.g. DB was wiped), clear stale session.
+        const { error } = await supabase.auth.getUser();
+        if (error) {
+          await supabase.auth.signOut();
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+      }
       setSession(sess);
       setUser(sess?.user ?? null);
       setLoading(false);
-    });
+    })();
 
     return () => sub.subscription.unsubscribe();
   }, []);
