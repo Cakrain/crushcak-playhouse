@@ -25,19 +25,31 @@ Deno.serve(async (req: Request) => {
     }
     const token = authHeader.replace("Bearer ", "");
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
+    const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-    // Verify JWT signature/claims locally (faster, doesn't hit auth API).
-    const { data: claimsData, error: cErr } = await supabase.auth.getClaims(token);
-    if (cErr || !claimsData?.claims?.sub) {
-      console.warn("cakbot auth rejected:", cErr?.message ?? "no claims");
-      return json({ error: "unauthorized", reason: "invalid_token" }, 401);
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SERVICE_ROLE) {
+      console.error("cakbot missing env", {
+        hasUrl: !!SUPABASE_URL,
+        hasAnon: !!SUPABASE_ANON_KEY,
+        hasService: !!SERVICE_ROLE,
+      });
+      return json({ error: "server_misconfigured" }, 500);
     }
-    const userId = claimsData.claims.sub as string;
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    // Verify token by fetching the user from the auth server.
+    const { data: userData, error: uErr } = await supabase.auth.getUser(token);
+    if (uErr || !userData?.user?.id) {
+      console.warn("cakbot auth rejected:", uErr?.message ?? "no user");
+      return json({ error: "unauthorized", reason: "invalid_token", detail: uErr?.message }, 401);
+    }
+    const userId = userData.user.id;
 
     const body = await req.json().catch(() => ({}));
     const message = String(body.message ?? "").trim().slice(0, 2000);
@@ -45,10 +57,9 @@ Deno.serve(async (req: Request) => {
     if (!message) return json({ error: "empty_message" }, 400);
 
     // Rate limit: count assistant messages in last hour for this user
-    const admin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
     const sinceIso = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const { count } = await admin
       .from("support_chats")
