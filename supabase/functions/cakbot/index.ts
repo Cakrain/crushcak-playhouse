@@ -21,18 +21,23 @@ Deno.serve(async (req: Request) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return json({ error: "unauthorized" }, 401);
+      return json({ error: "unauthorized", reason: "missing_bearer" }, 401);
     }
+    const token = authHeader.replace("Bearer ", "");
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } },
     );
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: uErr } = await supabase.auth.getUser(token);
-    if (uErr || !userData?.user?.id) return json({ error: "unauthorized" }, 401);
-    const userId = userData.user.id;
+
+    // Verify JWT signature/claims locally (faster, doesn't hit auth API).
+    const { data: claimsData, error: cErr } = await supabase.auth.getClaims(token);
+    if (cErr || !claimsData?.claims?.sub) {
+      console.warn("cakbot auth rejected:", cErr?.message ?? "no claims");
+      return json({ error: "unauthorized", reason: "invalid_token" }, 401);
+    }
+    const userId = claimsData.claims.sub as string;
 
     const body = await req.json().catch(() => ({}));
     const message = String(body.message ?? "").trim().slice(0, 2000);
