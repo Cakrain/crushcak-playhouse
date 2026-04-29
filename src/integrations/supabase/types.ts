@@ -59,8 +59,36 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          avatar_url: string | null
           country: string | null
           created_at: string
           date_of_birth: string | null
@@ -68,16 +96,20 @@ export type Database = {
           first_name: string
           gender: string | null
           id: string
+          is_banned: boolean
           language: Database["public"]["Enums"]["lang_preference"]
           last_name: string
           national_id: string | null
           phone: string | null
+          referred_by: string | null
           theme: Database["public"]["Enums"]["theme_preference"]
           trx_deposit_address: string
           updated_at: string
           user_id: string
+          username: string | null
         }
         Insert: {
+          avatar_url?: string | null
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -85,16 +117,20 @@ export type Database = {
           first_name?: string
           gender?: string | null
           id?: string
+          is_banned?: boolean
           language?: Database["public"]["Enums"]["lang_preference"]
           last_name?: string
           national_id?: string | null
           phone?: string | null
+          referred_by?: string | null
           theme?: Database["public"]["Enums"]["theme_preference"]
           trx_deposit_address: string
           updated_at?: string
           user_id: string
+          username?: string | null
         }
         Update: {
+          avatar_url?: string | null
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -102,14 +138,35 @@ export type Database = {
           first_name?: string
           gender?: string | null
           id?: string
+          is_banned?: boolean
           language?: Database["public"]["Enums"]["lang_preference"]
           last_name?: string
           national_id?: string | null
           phone?: string | null
+          referred_by?: string | null
           theme?: Database["public"]["Enums"]["theme_preference"]
           trx_deposit_address?: string
           updated_at?: string
           user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
         }
         Relationships: []
       }
@@ -139,35 +196,50 @@ export type Database = {
       }
       transactions: {
         Row: {
+          admin_note: string | null
           amount: number
           created_at: string
+          crypto: Database["public"]["Enums"]["crypto_currency"]
           destination_address: string | null
           id: string
           notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           status: Database["public"]["Enums"]["transaction_status"]
           tx_hash: string | null
+          txid: string | null
           type: Database["public"]["Enums"]["transaction_type"]
           user_id: string
         }
         Insert: {
+          admin_note?: string | null
           amount: number
           created_at?: string
+          crypto?: Database["public"]["Enums"]["crypto_currency"]
           destination_address?: string | null
           id?: string
           notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["transaction_status"]
           tx_hash?: string | null
+          txid?: string | null
           type: Database["public"]["Enums"]["transaction_type"]
           user_id: string
         }
         Update: {
+          admin_note?: string | null
           amount?: number
           created_at?: string
+          crypto?: Database["public"]["Enums"]["crypto_currency"]
           destination_address?: string | null
           id?: string
           notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["transaction_status"]
           tx_hash?: string | null
+          txid?: string | null
           type?: Database["public"]["Enums"]["transaction_type"]
           user_id?: string
         }
@@ -252,6 +324,17 @@ export type Database = {
       }
     }
     Functions: {
+      admin_user_stats: {
+        Args: { _user_id: string }
+        Returns: {
+          biggest_win: number
+          total_deposits: number
+          total_wagered: number
+          total_withdrawals: number
+          total_won: number
+        }[]
+      }
+      email_for_username: { Args: { _username: string }; Returns: string }
       get_live_bets_feed: {
         Args: never
         Returns: {
@@ -271,9 +354,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      promote_user_to_admin: { Args: { _email: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "user"
+      crypto_currency: "TRX" | "USDT" | "BTC" | "ETH" | "BNB"
       game_type:
         | "cakplain"
         | "minescak"
@@ -414,6 +499,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      crypto_currency: ["TRX", "USDT", "BTC", "ETH", "BNB"],
       game_type: [
         "cakplain",
         "minescak",
