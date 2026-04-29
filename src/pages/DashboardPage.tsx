@@ -7,7 +7,12 @@ import { TopNav } from "@/components/dashboard/TopNav";
 import { GameSidebar, MobileGamePicker } from "@/components/dashboard/GameSidebar";
 import { LiveBetsFeed } from "@/components/dashboard/LiveBetsFeed";
 import { CakPlainGame } from "@/games/CakPlainGame";
-import { ComingSoonGame } from "@/games/ComingSoonGame";
+import { MinesCakGame } from "@/games/MinesCakGame";
+import { BlackCakGame } from "@/games/BlackCakGame";
+import { PlincoCakGame } from "@/games/PlincoCakGame";
+import { LimboCakGame } from "@/games/LimboCakGame";
+import { RokketCakGame } from "@/games/RokketCakGame";
+import { BalloonCakGame } from "@/games/BalloonCakGame";
 import { CakBot } from "@/components/cakbot/CakBot";
 import { GameId } from "@/games/registry";
 import { Loader2 } from "lucide-react";
@@ -37,7 +42,13 @@ export default function DashboardPage() {
       <div className="flex">
         <GameSidebar active={activeGame} onSelect={setActiveGame} />
         <main className="min-h-[calc(100vh-4rem)] flex-1 p-3 md:p-6">
-          {activeGame === "cakplain" ? <CakPlainGame /> : <ComingSoonGame gameId={activeGame} />}
+          {activeGame === "cakplain" && <CakPlainGame />}
+          {activeGame === "minescak" && <MinesCakGame />}
+          {activeGame === "blackcak" && <BlackCakGame />}
+          {activeGame === "plincocak" && <PlincoCakGame />}
+          {activeGame === "limbocak" && <LimboCakGame />}
+          {activeGame === "rokketcak" && <RokketCakGame />}
+          {activeGame === "ballooncak" && <BalloonCakGame />}
         </main>
         <LiveBetsFeed />
       </div>
